@@ -1,6 +1,5 @@
 """
 Routed multi-agent chat
-──────────────────────────────────────
 * Groq (LLama-3) = domain expert
 * Gemini (Flash) = critic / validator
 * check_agent()  = tiny Gemini call that returns 0 (new Q) or 1 (clarification)
@@ -8,18 +7,18 @@ Routed multi-agent chat
 
 import os, sys, requests
 from google import genai
-from google.genai import types as gtypes   # same alias you used
+from google.genai import types as gtypes   
 
-# ─── API KEYS ──────────────────────────────────────────────────────────
+
 GROQ_API_KEY   = os.getenv("GROQ_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not (GROQ_API_KEY and GEMINI_API_KEY):
     sys.exit("⚠  Export GROQ_API_KEY & GEMINI_API_KEY before running")
 
-# ─── GEMINI CLIENT -----------------------------------------------------
+
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# ─── GROQ WRAPPER ------------------------------------------------------
+
 GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama3-70b-8192"
 
@@ -43,7 +42,7 @@ def call_groq_expert(question: str) -> str:
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"].strip()
 
-# ─── GEMINI CRITIC & ROUTER ────────────────────────────────────────────
+
 def call_gemini_critic(question: str, answer: str) -> str:
     critic_sys = ("You are Agent-B, a meticulous critic. "
                   "Evaluate the expert's answer for correctness, clarity, and completeness. "
@@ -76,7 +75,7 @@ def check_agent(user_turn: str) -> int:
     )
     return int(resp.text.strip()[0]) if resp.text.strip()[0] in "01" else 0
 
-# ─── MAIN LOOP ─────────────────────────────────────────────────────────
+
 def run_multi_agent_chat() -> None:
     print("Dual-Agent Chat  (exit › quit)\n")
     last_q, last_a = None, None
